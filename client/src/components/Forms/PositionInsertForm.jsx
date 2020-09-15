@@ -1,15 +1,17 @@
 import React from 'react';
-import { Form, Container } from 'react-bootstrap';
+import { Form, Col, Container } from 'react-bootstrap';
 import { Formik } from 'formik';
 import * as yup from 'yup';
 
-import { AutoComplete } from '../';
+import { Typeahead } from 'react-bootstrap-typeahead';
+
 import styles from './PositionInsertForm.module.scss';
 
 const PositionInsertForm = (props) => {
     const validationSchema = yup.object({
         exchange: yup.string().required('Exchange is required'),
-        base: yup.object().required('Trading base is required'),
+        base: yup.string().required('Trading base is required'),
+        target: yup.string().required('Trading base is required'),
         direction: yup.string().required('Direction is required'),
         size: yup.number().positive().required('Size is required'),
         entry: yup.number().positive().required('Entry is required'),
@@ -18,9 +20,17 @@ const PositionInsertForm = (props) => {
     return (
         <Container>
             <Formik
-                initialValues={{ exchange: '', base: '', target: '', direction: 'long', size: 0, entry: 0 }}
+                initialValues={{
+                    exchange: undefined,
+                    base: undefined,
+                    target: undefined,
+                    direction: 'long',
+                    size: 0,
+                    entry: 0,
+                }}
                 validationSchema={validationSchema}
                 onSubmit={async (values) => {
+                    console.log('submitting', values);
                     props.insertPosition(values);
                 }}
             >
@@ -37,71 +47,68 @@ const PositionInsertForm = (props) => {
                     isValid,
                 }) => (
                     <Form noValidate onSubmit={handleSubmit} className={styles.form}>
-                        <Form.Group controlId='formGroupExchange' className={styles.group}>
+                        <Form.Group controlId='formGroupExchange'>
                             <Form.Label>Exchange</Form.Label>
-                            <AutoComplete
+                            <Typeahead
                                 id='exchange'
                                 labelKey='name'
-                                minLength={3}
+                                options={props.exchangeOptions}
                                 onChange={(selected) => {
                                     console.log(selected);
                                     if (!selected.length) return;
                                     setFieldValue('exchange', selected[0].name);
                                 }}
-                                onBlur={() => console.log('blur')}
+                                onBlur={() => {
+                                    setFieldTouched('exchange', true);
+                                    props.getTickersByExchange(values.exchange);
+                                }}
+                                placeholder='...'
+                                isValid={touched.exchange && !errors.exchange}
                             />
                         </Form.Group>
-                        {values.exchange && (
-                            <Form.Group controlId='formGroupPair'>
-                                <Form.Label>Base</Form.Label>
-                                <AutoComplete
-                                    id='base'
-                                    options={props.baseOptions || []}
-                                    labelKey={(option) => `${option.base} (${option.id.toUpperCase()})`}
-                                    exchange={values.exchange}
-                                    onChange={(selected) => {
-                                        console.log(selected);
-                                        if (!selected.length) return;
-                                        setFieldValue('base', selected[0]);
-                                        props.getTickersByExchange(selected[0].id);
-                                    }}
-                                    onBlur={(e) => {
-                                        setFieldTouched('base', true);
-                                    }}
-                                    placeholder='...'
-                                />
-                                <Form.Label>Target</Form.Label>
-                                <Form.Control
-                                    as='select'
-                                    name='target'
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    value={values.target}
-                                    isValid={touched.target && !errors.target}
-                                    className={styles.control}
-                                >
-                                    <option>BTC</option>
-                                    <option>ETH</option>
-                                    <option>USD</option>
-                                </Form.Control>
-                                {/* <AutoComplete
-                                    id='target'
-                                    options={[
-                                        { name: 'BTC', id: 'btc' },
-                                        { name: 'USD', id: 'usd' },
-                                        { name: 'ETH', id: 'eth' },
-                                    ]}
-                                    labelKey='name'
-                                    onChange={(selected) => {
-                                        if (!selected.length) return;
-                                        setFieldValue('target', selected[0].target || '');
-                                    }}
-                                    onBlur={(e) => {
-                                        setFieldTouched('target', true);
-                                    }}
-                                /> */}
-                            </Form.Group>
-                        )}
+
+                        <Form.Group controlId='formGroupPair'>
+                            <Form.Row>
+                                <Col>
+                                    <Form.Label>Base</Form.Label>
+                                    <Typeahead
+                                        id='base'
+                                        options={props.baseOptions || []}
+                                        disabled={!values.exchange}
+                                        labelKey={(option) => `${option.base} (${option.id.toUpperCase()})`}
+                                        exchange={values.exchange}
+                                        onChange={(selected) => {
+                                            if (!selected.length) return;
+                                            setFieldValue('base', selected[0].base);
+                                        }}
+                                        onBlur={(e) => {
+                                            setFieldTouched('base', true);
+                                        }}
+                                        placeholder='...'
+                                        isValid={touched.base && !errors.base}
+                                    />
+                                </Col>
+                                <Col>
+                                    <Form.Label>Target</Form.Label>
+                                    <Form.Control
+                                        as='select'
+                                        name='target'
+                                        disabled={!values.exchange}
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        value={values.target}
+                                        isValid={touched.target && !errors.target}
+                                        className={styles.control}
+                                        placeholder='...'
+                                    >
+                                        <option>BTC</option>
+                                        <option>ETH</option>
+                                        <option>USD</option>
+                                    </Form.Control>
+                                </Col>
+                            </Form.Row>
+                        </Form.Group>
+
                         <Form.Group controlId='formGroupDirection'>
                             <Form.Label>Direction</Form.Label>
                             <Form.Control
@@ -126,7 +133,6 @@ const PositionInsertForm = (props) => {
                                 onBlur={handleBlur}
                                 value={values.size}
                                 isValid={touched.size && !errors.size}
-                                isInvalid={errors.size}
                                 autoComplete='off'
                             />
                         </Form.Group>
@@ -139,7 +145,6 @@ const PositionInsertForm = (props) => {
                                 onBlur={handleBlur}
                                 value={values.entry}
                                 isValid={touched.entry && !errors.entry}
-                                isInvalid={errors.entry}
                                 autoComplete='off'
                             />
                         </Form.Group>
