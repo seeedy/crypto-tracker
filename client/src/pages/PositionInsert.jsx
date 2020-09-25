@@ -24,7 +24,6 @@ const PositionsInsert = () => {
         setIsLoading(true);
         // get coin tickers by exchange from coingecko api
         const data = await api.getTickersByExchange(exchange);
-        console.log({ data });
         // get trading pair base and coin_id
         const baseOptions = data.data.tickers.map((elem) => {
             return { base: elem.base, id: elem.coin_id };

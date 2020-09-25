@@ -27,7 +27,7 @@ createPosition = (req, res) => {
             });
         })
         .catch((err) => {
-            return res.status(400).json({ success: false, message: 'Position not added' });
+            return res.status(400).json({ success: false, message: 'Position not added', error: err });
         });
 };
 

@@ -8,9 +8,9 @@ mongoose.set('useCreateIndex', true);
 
 const Position = new Schema(
     {
+        exchange: { type: String, required: true },
         base: { type: String, required: true },
         target: { type: String, required: true },
-        exchange: { type: String, required: true },
         direction: { type: String, required: true },
         size: { type: Number, required: true },
         entry: { type: Number, required: true },

@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { TableContainer } from '../components';
 // import { SelectColumnFilter } from '../components/Table/filters';
-import api, { getCurrentPrices } from '../api';
+import api from '../api';
 import { format, parseISO } from 'date-fns';
 import { Button, Container } from 'react-bootstrap';
 
-import queryString from 'query-string';
+// import queryString from 'query-string';
 
 const PositionsList = () => {
     // const [isLoading, setIsLoading] = useState(true);
@@ -64,11 +64,19 @@ const PositionsList = () => {
                 id: 'exchange',
                 Header: 'Exchange',
                 accessor: 'exchange',
+                disableFilters: true,
             },
             {
-                id: 'pair',
-                Header: 'Pair',
-                accessor: 'pair',
+                id: 'base',
+                Header: 'Base',
+                accessor: 'base',
+                disableFilters: true,
+            },
+            {
+                id: 'target',
+                Header: 'Target',
+                accessor: 'target',
+                disableFilters: true,
             },
             {
                 id: 'direction',

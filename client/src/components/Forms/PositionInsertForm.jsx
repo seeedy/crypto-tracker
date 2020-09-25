@@ -127,7 +127,7 @@ const PositionInsertForm = (props) => {
                         <Form.Group controlId='formGroupSize'>
                             <Form.Label>Size</Form.Label>
                             <Form.Control
-                                type='text'
+                                type='number'
                                 name='size'
                                 onChange={handleChange}
                                 onBlur={handleBlur}
@@ -139,11 +139,13 @@ const PositionInsertForm = (props) => {
                         <Form.Group controlId='formGroupEntry'>
                             <Form.Label>Entry</Form.Label>
                             <Form.Control
-                                type='text'
+                                disabled={!values.target}
+                                type='number'
+                                step={values.target === 'USD' ? '0.01' : '0.00000001'}
                                 name='entry'
                                 onChange={handleChange}
                                 onBlur={handleBlur}
-                                value={values.entry}
+                                value={values.entry.toFixed(8).replace(/\.?0+$/, '')}
                                 isValid={touched.entry && !errors.entry}
                                 autoComplete='off'
                             />
