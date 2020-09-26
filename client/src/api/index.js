@@ -13,7 +13,7 @@ export const getAllPositions = () => mongoAPI.get('/positions');
 export const deletePositionById = (id) => mongoAPI.delete(`/position/${id}`);
 
 export const getAllPairs = () => coingeckoAPI.get('/coins/list');
-export const getCurrentPrices = (pairs) => coingeckoAPI.get(`/simple/price/${pairs}`);
+export const getCurrentPrice = (base, target) => coingeckoAPI.get(`/simple/price/?ids=${base}&vs_currencies=${target}`);
 export const getExchanges = () => coingeckoAPI.get('/exchanges/list');
 export const getTickersByExchange = (id) => coingeckoAPI.get(`/exchanges/${id}/tickers`);
 
@@ -22,7 +22,7 @@ const apis = {
     getAllPositions,
     deletePositionById,
     getAllPairs,
-    getCurrentPrices,
+    getCurrentPrice,
     getExchanges,
     getTickersByExchange,
 };

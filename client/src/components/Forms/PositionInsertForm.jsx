@@ -26,7 +26,7 @@ const PositionInsertForm = (props) => {
                     target: undefined,
                     direction: 'long',
                     size: 0,
-                    entry: 0,
+                    entry: undefined,
                 }}
                 validationSchema={validationSchema}
                 onSubmit={async (values) => {
@@ -75,13 +75,14 @@ const PositionInsertForm = (props) => {
                                         id='base'
                                         options={props.baseOptions || []}
                                         disabled={!values.exchange}
-                                        labelKey={(option) => `${option.base} (${option.id.toUpperCase()})`}
+                                        labelKey={(option) => `${option.id.toUpperCase()} (${option.base})`}
                                         exchange={values.exchange}
                                         onChange={(selected) => {
+                                            console.log(selected);
                                             if (!selected.length) return;
-                                            setFieldValue('base', selected[0].base);
+                                            setFieldValue('base', selected[0].id);
                                         }}
-                                        onBlur={(e) => {
+                                        onBlur={() => {
                                             setFieldTouched('base', true);
                                         }}
                                         placeholder='...'
@@ -90,21 +91,28 @@ const PositionInsertForm = (props) => {
                                 </Col>
                                 <Col>
                                     <Form.Label>Target</Form.Label>
-                                    <Form.Control
-                                        as='select'
-                                        name='target'
+                                    <Typeahead
+                                        id='target'
                                         disabled={!values.exchange}
-                                        onChange={handleChange}
-                                        onBlur={handleBlur}
+                                        options={[
+                                            { name: 'USD', id: 'usd' },
+                                            { name: 'BTC', id: 'btc' },
+                                        ]}
+                                        labelKey='name'
+                                        onChange={async (selected) => {
+                                            console.log(selected);
+                                            if (!selected.length) return;
+                                            setFieldValue('target', selected[0].id);
+                                        }}
+                                        onBlur={async (e) => {
+                                            setFieldTouched('target', true);
+                                            props.getCurrentPrice(values);
+                                        }}
                                         value={values.target}
                                         isValid={touched.target && !errors.target}
                                         className={styles.control}
                                         placeholder='...'
-                                    >
-                                        <option>BTC</option>
-                                        <option>ETH</option>
-                                        <option>USD</option>
-                                    </Form.Control>
+                                    />
                                 </Col>
                             </Form.Row>
                         </Form.Group>
@@ -141,11 +149,15 @@ const PositionInsertForm = (props) => {
                             <Form.Control
                                 disabled={!values.target}
                                 type='number'
-                                step={values.target === 'USD' ? '0.01' : '0.00000001'}
+                                step='0.00000001'
                                 name='entry'
                                 onChange={handleChange}
                                 onBlur={handleBlur}
-                                value={values.entry.toFixed(8).replace(/\.?0+$/, '')}
+                                value={
+                                    values.entry
+                                        ? values.entry.toFixed(8).replace(/\.?0+$/, '')
+                                        : props.currentPrice.toFixed(8).replace(/\.?0+$/, '')
+                                }
                                 isValid={touched.entry && !errors.entry}
                                 autoComplete='off'
                             />

@@ -7,6 +7,7 @@ const PositionsInsert = () => {
     const [baseOptions, setBaseOptions] = useState([]);
     const [exchangeOptions, setExchangeOptions] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [currentPrice, setCurrentPrice] = useState(0);
 
     useEffect(() => {
         setIsLoading(true);
@@ -39,6 +40,20 @@ const PositionsInsert = () => {
         setIsLoading(false);
     };
 
+    const getCurrentPrice = async (values) => {
+        setIsLoading(true);
+        // get price of currently chosen base-target pair
+        const { base, target } = values;
+        await api.getCurrentPrice(base, target).then((res) => {
+            console.log(res);
+            const currentPrice = res.data[base][target];
+            console.log({ currentPrice });
+            // set as current price in form
+            setCurrentPrice(currentPrice);
+            setIsLoading(false);
+        });
+    };
+
     const insertPosition = async (values) => {
         console.log({ values });
         await api.insertPosition(values).then((res) => {
@@ -52,6 +67,8 @@ const PositionsInsert = () => {
                 insertPosition={insertPosition}
                 baseOptions={baseOptions}
                 exchangeOptions={exchangeOptions}
+                currentPrice={currentPrice}
+                getCurrentPrice={getCurrentPrice}
                 getTickersByExchange={getTickersByExchange}
                 isLoading={isLoading}
             />
